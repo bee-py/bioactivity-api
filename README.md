@@ -42,7 +42,33 @@ Interactive documentation is at http://localhost:8000/docs.
 `GET /health` returns the service status and whether the model loaded. The container health
 check calls it.
 
-`POST /predict` takes `{"smiles": "..."}`:
+`POST /predict` takes `{"smiles": "..."}`.
+
+### How to send a molecule
+
+The body must be a JSON object with one field called `smiles`. The braces and quotes matter:
+
+```json
+{"smiles": "Cn1cnc2c1c(=O)n(C)c(=O)n2C"}
+```
+
+Sending the SMILES on its own, like `"Cn1cnc2c1c(=O)n(C)c(=O)n2C"`, returns **422** before the
+molecule is ever read, because there is no `smiles` field to find. This catches people out in
+the `/docs` page: replace only the text between the quotation marks and leave the rest of the
+line alone.
+
+A SMILES string RDKit cannot parse also returns 422, with a message naming the string, so the
+two cases are easy to tell apart from the response.
+
+Three molecules to try, with what the model says about them:
+
+| Molecule | SMILES | Result |
+|---|---|---|
+| Dexamethasone, a glucocorticoid drug | `C[C@@H]1C[C@H]2[C@@H]3CCC4=CC(=O)C=C[C@@]4(C)[C@@]3(F)[C@@H](O)C[C@]2(C)[C@@]1(O)C(=O)CO` | active, 0.86 |
+| Aspirin | `CC(=O)Oc1ccccc1C(=O)O` | inactive, 0.418 |
+| Caffeine | `Cn1cnc2c1c(=O)n(C)c(=O)n2C` | inactive, 0.328 |
+
+A full request:
 
 ```bash
 curl -X POST http://localhost:8000/predict \
