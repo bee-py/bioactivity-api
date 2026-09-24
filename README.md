@@ -67,3 +67,23 @@ than a crash.
 
 The model is loaded once at start-up rather than per request. Dependencies are pinned and
 installed before the code is copied, so editing the code does not trigger a reinstall on rebuild.
+
+## Credits
+
+The task framing comes from my MSc coursework on the glucocorticoid receptor, which took its
+lead from two published models for the same target:
+
+- N. Schaduangrat, H. Chuntakaruk, T. Rungrotmongkol, P. Mookdarsanit and W. Shoombuatong,
+  *M3S-GRPred*, BMC Bioinformatics, 2025. https://doi.org/10.1186/s12859-025-06132-1
+- W. Shoombuatong, P. Mookdarsanit, N. Schaduangrat and L. Mookdarsanit, *BGATT-GR*,
+  Scientific Reports, 2025. https://doi.org/10.1038/s41598-025-05839-8
+
+Both use several fingerprint types and report stronger performance than the model here, which
+uses ten RDKit descriptors and exists to demonstrate serving and deployment rather than to
+compete with them. Neither paper's code is reused.
+
+Method and data sources: C. Cortes and V. Vapnik, *Support-vector networks*, Machine Learning,
+1995, for the classifier; J. Platt, *Probabilistic outputs for support vector machines*, 1999,
+for turning SVM scores into probabilities, which is what scikit-learn's `probability=True` does;
+and D. Mendez et al., *ChEMBL: towards direct deposition of bioassay data*, Nucleic Acids
+Research, 2018, for the bioactivity data. Descriptors are computed with RDKit.
