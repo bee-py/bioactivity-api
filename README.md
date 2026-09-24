@@ -1,22 +1,22 @@
 # Bioactivity API
 
-A trained classifier served behind a FastAPI endpoint and packaged in a Docker container.
-Send it a molecule as a SMILES string, and it returns whether the compound is likely to be
-active against the glucocorticoid receptor, with a probability and the descriptors the model saw.
+A model that predicts whether a compound is active against the glucocorticoid receptor, running
+as a web service. You send a molecule as a SMILES string and get back a probability, a yes or
+no, and the descriptors the model used.
 
 ## The model
 
-Trained on a ChEMBL bioactivity export for the glucocorticoid receptor (CHEMBL2034): 3,130
-compounds with a pChEMBL value, of which 2,660 are active (pChEMBL 6 or above, meaning an IC50
-of 1 micromolar or better) and 470 inactive.
+The training data is a ChEMBL export for the glucocorticoid receptor (CHEMBL2034). I kept the
+3,130 compounds that have a pChEMBL value, and labelled a compound active if that value is 6 or
+above, which is an IC50 of 1 micromolar or better. That gives 2,660 active and 470 inactive.
 
-Ten molecular descriptors are computed from each SMILES with RDKit: the four Lipinski
-descriptors plus polar surface area, rotatable bonds, aromatic rings, fraction of sp3 carbons,
-heavy atom count and ring count. An RBF support vector machine with class weighting sits behind
-a standard scaler in a scikit-learn pipeline.
+RDKit computes ten descriptors for each compound from its SMILES: molecular weight, logP,
+hydrogen bond donors and acceptors, polar surface area, rotatable bonds, aromatic rings,
+fraction of sp3 carbons, heavy atoms and rings. The descriptors are scaled, then a support
+vector machine with an RBF kernel is trained on them. Classes are weighted, because there are
+about five times more actives than inactives.
 
-Held-out AUC: **0.824**. The four Lipinski descriptors alone give 0.748, so shape and polarity
-are doing real work.
+The AUC on the held-out 20% is **0.824**. Using only the first four descriptors gives 0.748.
 
 ## Running it
 
@@ -53,9 +53,8 @@ The body must be a JSON object with one field called `smiles`. The braces and qu
 ```
 
 Sending the SMILES on its own, like `"Cn1cnc2c1c(=O)n(C)c(=O)n2C"`, returns **422** before the
-molecule is ever read, because there is no `smiles` field to find. This catches people out in
-the `/docs` page: replace only the text between the quotation marks and leave the rest of the
-line alone.
+molecule is ever read, because there is no `smiles` field to find. In the `/docs` page, replace
+only the text between the quotation marks and leave the rest of the line alone.
 
 A SMILES string RDKit cannot parse also returns 422, with a message naming the string, so the
 two cases are easy to tell apart from the response.
@@ -85,10 +84,6 @@ curl -X POST http://localhost:8000/predict \
 }
 ```
 
-That molecule is dexamethasone, a glucocorticoid drug, and the model calls it active at 0.86.
-Aspirin comes back inactive at 0.418. A string RDKit cannot parse is rejected with a 422 rather
-than a crash.
-
 ## Notes
 
 The model is loaded once at start-up rather than per request. Dependencies are pinned and
@@ -104,9 +99,9 @@ lead from two published models for the same target:
 - W. Shoombuatong, P. Mookdarsanit, N. Schaduangrat and L. Mookdarsanit, *BGATT-GR*,
   Scientific Reports, 2025. https://doi.org/10.1038/s41598-025-05839-8
 
-Both use several fingerprint types and report stronger performance than the model here, which
-uses ten RDKit descriptors and exists to demonstrate serving and deployment rather than to
-compete with them. Neither paper's code is reused.
+Both use several fingerprint types and report better results than this model, which uses ten
+RDKit descriptors. I built it to practise serving and deployment, not to match their numbers.
+No code from either paper is used here.
 
 Method and data sources: C. Cortes and V. Vapnik, *Support-vector networks*, Machine Learning,
 1995, for the classifier; J. Platt, *Probabilistic outputs for support vector machines*, 1999,
