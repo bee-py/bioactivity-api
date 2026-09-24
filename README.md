@@ -110,6 +110,5 @@ compete with them. Neither paper's code is reused.
 
 Method and data sources: C. Cortes and V. Vapnik, *Support-vector networks*, Machine Learning,
 1995, for the classifier; J. Platt, *Probabilistic outputs for support vector machines*, 1999,
-for turning SVM scores into probabilities, which is what scikit-learn's `probability=True` does;
-and D. Mendez et al., *ChEMBL: towards direct deposition of bioassay data*, Nucleic Acids
+for turning SVM scores into probabilities; and D. Mendez et al., *ChEMBL: towards direct deposition of bioassay data*, Nucleic Acids
 Research, 2018, for the bioactivity data. Descriptors are computed with RDKit.
