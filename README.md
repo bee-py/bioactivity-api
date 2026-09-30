@@ -84,6 +84,27 @@ curl -X POST http://localhost:8000/predict \
 }
 ```
 
+## Tests
+
+pytest is listed in a separate requirements file so that it is not installed into the Docker
+image, which only needs what the service itself runs on:
+
+```
+pip install -r requirements-dev.txt
+pytest
+```
+
+There are four tests, one for each thing that has to be right:
+
+- `/health` reports that the model is loaded, not just that the service is running
+- dexamethasone comes back active and caffeine comes back inactive, so the model is checked in
+  both directions rather than only one
+- the answer contains the ten measurements, a probability between 0 and 1, and a yes or no that
+  follows from that probability
+- both kinds of bad request are turned away with a 422 and a message saying what was wrong
+
+They take about three seconds and do not need the service to be started first.
+
 ## Notes
 
 The model is loaded once at start-up rather than per request. Dependencies are pinned and
